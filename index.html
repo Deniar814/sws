@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPK Dinamis - SAW, WP, SMART</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans flex flex-col min-h-screen">
+
+    <div class="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
+        
+        <div class="bg-blue-600 text-white p-6 rounded-xl shadow-md mb-6 flex flex-col sm:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold mb-1">Sistem Pendukung Keputusan</h1>
+                <p class="text-blue-200 text-sm">Metode: SAW, WP, SMART</p>
+            </div>
+            <div class="mt-4 sm:mt-0 text-right">
+                <button onclick="loadDataDummy()" class="px-4 py-2 bg-yellow-400 text-blue-900 text-sm rounded hover:bg-yellow-300 font-bold shadow transition">
+                    ⚡ Load Data Dummy
+                </button>
+                <p class="text-xs text-blue-200 mt-2">Deniar Purnama (231011401753)</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6">
+            
+            <div class="w-full md:w-1/4 bg-white p-4 rounded-xl shadow-sm border border-gray-200 h-fit">
+                <ul class="space-y-2">
+                    <li><button onclick="pindahTab('tab-kriteria')" id="nav-kriteria" class="w-full text-left px-4 py-3 rounded-lg font-semibold bg-blue-50 text-blue-700 border-l-4 border-blue-500 transition-all">✅ Step 1: Kriteria</button></li>
+                    <li><button onclick="pindahTab('tab-alternatif')" id="nav-alternatif" class="w-full text-left px-4 py-3 rounded-lg font-semibold text-slate-600 hover:bg-slate-50 transition-all">✅ Step 2: Alternatif</button></li>
+                    <li><button onclick="pindahTab('tab-kalkulasi')" id="nav-kalkulasi" class="w-full text-left px-4 py-3 rounded-lg font-semibold text-slate-600 hover:bg-slate-50 transition-all">🧮 Step 3: Kalkulasi</button></li>
+                    <li><button onclick="pindahTab('tab-hasil')" id="nav-hasil" class="w-full text-left px-4 py-3 rounded-lg font-semibold text-slate-600 hover:bg-slate-50 transition-all hidden">🏆 Step 4: Hasil Akhir</button></li>
+                </ul>
+            </div>
+
+            <div class="w-full md:w-3/4">
+                
+                <div id="tab-kriteria" class="tab-content active bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-2 mb-4">Input Data Kriteria</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 bg-slate-50 p-4 rounded-lg border">
+                        <input type="text" id="inputNamaKriteria" placeholder="Nama Kriteria" class="border p-2 rounded text-sm w-full sm:col-span-1">
+                        <select id="inputSifatKriteria" class="border p-2 rounded text-sm w-full">
+                            <option value="Benefit">Benefit</option>
+                            <option value="Cost">Cost</option>
+                        </select>
+                        <input type="number" id="inputBobotKriteria" placeholder="Bobot (ex: 0.2)" step="0.01" class="border p-2 rounded text-sm w-full">
+                        <button onclick="tambahKriteria()" class="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 font-semibold w-full">Tambah</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 border-b"><th class="p-3">Kode</th><th class="p-3">Kriteria</th><th class="p-3">Sifat</th><th class="p-3">Bobot</th><th class="p-3 text-center">Aksi</th></tr>
+                            </thead>
+                            <tbody id="tabelKriteria"></tbody>
+                        </table>
+                    </div>
+                    <div class="mt-6 text-right">
+                        <button onclick="pindahTab('tab-alternatif')" class="px-6 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 font-semibold transition">Lanjut ke Alternatif 👉</button>
+                    </div>
+                </div>
+
+                <div id="tab-alternatif" class="tab-content bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-2 mb-4">Input Data Alternatif</h2>
+                    <div class="mb-6 bg-slate-50 p-4 rounded-lg border">
+                        <input type="text" id="inputNamaAlternatif" placeholder="Nama Kandidat / Barang" class="border p-2 rounded text-sm w-full mb-3">
+                        <div id="areaInputNilaiKriteria" class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+                            <p class="text-xs text-red-500">Isi kriteria terlebih dahulu di Step 1.</p>
+                        </div>
+                        <button onclick="tambahAlternatif()" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 font-semibold w-full">Simpan Alternatif</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead><tr class="bg-slate-100 text-slate-700 border-b" id="headerTabelAlternatif"></tr></thead>
+                            <tbody id="tabelAlternatif"></tbody>
+                        </table>
+                    </div>
+                    <div class="mt-6 flex justify-between">
+                        <button onclick="pindahTab('tab-kriteria')" class="px-6 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 font-semibold transition">👈 Kembali</button>
+                        <button onclick="pindahTab('tab-kalkulasi')" class="px-6 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 font-semibold transition">Lanjut ke Kalkulasi 👉</button>
+                    </div>
+                </div>
+
+                <div id="tab-kalkulasi" class="tab-content bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-2 mb-4">Kalkulasi Perhitungan</h2>
+                    <p class="text-sm text-slate-500 mb-6">Pilih metode untuk melihat proses matriks perhitungannya secara detail.</p>
+                    
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button onclick="prosesKalkulasi('SAW')" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition active:scale-95">Kalkulasi SAW</button>
+                        <button onclick="prosesKalkulasi('WP')" class="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 font-semibold shadow transition active:scale-95">Kalkulasi WP</button>
+                        <button onclick="prosesKalkulasi('SMART')" class="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 font-semibold shadow transition active:scale-95">Kalkulasi SMART</button>
+                    </div>
+
+                    <div id="areaTabelKalkulasi" class="space-y-8 hidden">
+                        </div>
+
+                    <div id="tombolLanjutHasil" class="mt-8 text-right hidden">
+                        <button onclick="pindahTab('tab-hasil')" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold shadow-lg transition animate-pulse">Lihat Hasil Akhir & Ranking 🏆</button>
+                    </div>
+                </div>
+
+                <div id="tab-hasil" class="tab-content bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
+                    <h2 id="judulHasil" class="text-2xl font-bold text-yellow-400 border-b border-slate-600 pb-2 mb-6 text-center">🏆 Hasil Perankingan</h2>
+                    <div class="overflow-x-auto bg-slate-900 rounded-lg p-2">
+                        <table class="w-full text-left text-sm border-collapse text-white">
+                            <thead>
+                                <tr class="bg-slate-700">
+                                    <th class="p-4 rounded-tl-lg">Peringkat</th>
+                                    <th class="p-4">Alternatif</th>
+                                    <th class="p-4 rounded-tr-lg">Skor Akhir</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelHasilAkhir"></tbody>
+                        </table>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <button onclick="pindahTab('tab-kalkulasi')" class="px-6 py-2 border border-slate-500 text-slate-300 rounded hover:bg-slate-700 font-semibold transition">Kembali ke Kalkulasi</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="max-w-7xl mx-auto w-full mt-auto pt-8 pb-4 px-4">
+        <footer class="text-center py-4 text-slate-500 text-sm border-t border-slate-200">
+            &copy; 2026 Create by <strong>Deniar Purnama (231011401753)</strong> | Teknik Informatika
+        </footer>
+    </div>
+
+    <script>
+        let kriteriaList = [];
+        let alternatifList = [];
+        let kriteriaCounter = 1;
+        let hasilRankingGlobal = []; 
+        let metodeAktif = "";
+
+        // --- SISTEM NAVIGASI TAB ---
+        function pindahTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('[id^="nav-"]').forEach(el => {
+                el.className = "w-full text-left px-4 py-3 rounded-lg font-semibold text-slate-600 hover:bg-slate-50 transition-all";
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            let navId = tabId.replace('tab', 'nav');
+            let navBtn = document.getElementById(navId);
+            if(navBtn) {
+                navBtn.className = "w-full text-left px-4 py-3 rounded-lg font-semibold bg-blue-50 text-blue-700 border-l-4 border-blue-500 transition-all";
+                navBtn.classList.remove('hidden'); 
+            }
+        }
+
+        // --- FUNGSI CRUD STANDAR ---
+        function renderKriteria() {
+            const tb = document.getElementById('tabelKriteria');
+            tb.innerHTML = '';
+            kriteriaList.forEach((k, i) => {
+                let badge = k.type === 'Benefit' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                tb.innerHTML += `<tr class="border-b hover:bg-slate-50"><td class="p-3">${k.id}</td><td class="p-3">${k.nama}</td><td class="p-3"><span class="px-2 py-1 text-xs font-bold rounded ${badge}">${k.type}</span></td><td class="p-3 font-mono">${k.bobot}</td><td class="p-3 text-center"><button onclick="hapusKriteria(${i})" class="text-red-500 font-bold">X</button></td></tr>`;
+            });
+
+            const areaInput = document.getElementById('areaInputNilaiKriteria');
+            if (kriteriaList.length === 0) { areaInput.innerHTML = ''; } 
+            else {
+                areaInput.innerHTML = '';
+                kriteriaList.forEach(k => {
+                    areaInput.innerHTML += `<div><label class="text-xs font-semibold text-slate-600">${k.nama} (${k.id})</label><input type="number" id="nilai_${k.id}" step="any" placeholder="Nilai" class="border p-2 rounded text-sm w-full mt-1 input-nilai-dinamis"></div>`;
+                });
+            }
+            renderTabelAlternatif();
+        }
+
+        function tambahKriteria() {
+            const nama = document.getElementById('inputNamaKriteria').value;
+            const type = document.getElementById('inputSifatKriteria').value;
+            const bobot = parseFloat(document.getElementById('inputBobotKriteria').value);
+            if(!nama || isNaN(bobot)) return alert("Isi form dengan benar!");
+            kriteriaList.push({ id: `C${kriteriaCounter++}`, nama, type, bobot });
+            document.getElementById('inputNamaKriteria').value = ''; document.getElementById('inputBobotKriteria').value = '';
+            renderKriteria();
+        }
+
+        function hapusKriteria(index) {
+            let idDihapus = kriteriaList[index].id;
+            kriteriaList.splice(index, 1);
+            alternatifList.forEach(alt => delete alt.nilai[idDihapus]);
+            renderKriteria();
+        }
+
+        function renderTabelAlternatif() {
+            const header = document.getElementById('headerTabelAlternatif');
+            let hHTML = `<th class="p-3">Alternatif</th>`;
+            kriteriaList.forEach(k => hHTML += `<th class="p-3">${k.id}</th>`);
+            hHTML += `<th class="p-3 text-center">Aksi</th>`;
+            header.innerHTML = hHTML;
+
+            const tb = document.getElementById('tabelAlternatif');
+            tb.innerHTML = '';
+            alternatifList.forEach((alt, i) => {
+                let baris = `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td>`;
+                kriteriaList.forEach(k => baris += `<td class="p-3">${alt.nilai[k.id] || 0}</td>`);
+                baris += `<td class="p-3 text-center"><button onclick="hapusAlternatif(${i})" class="text-red-500 font-bold">X</button></td></tr>`;
+                tb.innerHTML += baris;
+            });
+        }
+
+        function tambahAlternatif() {
+            const nama = document.getElementById('inputNamaAlternatif').value;
+            if(!nama || kriteriaList.length === 0) return alert("Validasi gagal!");
+            let nilaiMap = {}; let adaKosong = false;
+            kriteriaList.forEach(k => {
+                let val = document.getElementById(`nilai_${k.id}`).value;
+                if(val === "") adaKosong = true;
+                nilaiMap[k.id] = parseFloat(val);
+            });
+            if(adaKosong) return alert("Isi semua nilai kriteria!");
+            alternatifList.push({ nama, nilai: nilaiMap });
+            document.getElementById('inputNamaAlternatif').value = '';
+            document.querySelectorAll('.input-nilai-dinamis').forEach(input => input.value = '');
+            renderTabelAlternatif();
+        }
+
+        function hapusAlternatif(index) { alternatifList.splice(index, 1); renderTabelAlternatif(); }
+
+        // --- SISTEM KALKULASI & RENDER MATRIKS ---
+        function buatTabelMatriks(judul, headers, barisData) {
+            return `
+            <div class="border rounded-lg overflow-hidden mb-6 shadow-sm">
+                <div class="bg-slate-100 p-3 font-bold border-b text-slate-700">${judul}</div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead><tr class="bg-blue-600 text-white">${headers}</tr></thead>
+                        <tbody>${barisData}</tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        function getMinMax() {
+            let min = {}, max = {};
+            kriteriaList.forEach(k => { min[k.id] = 999999; max[k.id] = -999999; });
+            alternatifList.forEach(alt => {
+                kriteriaList.forEach(k => {
+                    let val = alt.nilai[k.id];
+                    if(val > max[k.id]) max[k.id] = val;
+                    if(val < min[k.id]) min[k.id] = val;
+                });
+            });
+            return { min, max };
+        }
+
+        function prosesKalkulasi(metode) {
+            if(kriteriaList.length === 0 || alternatifList.length === 0) return alert("Data kosong!");
+            metodeAktif = metode;
+            const areaKalkulasi = document.getElementById('areaTabelKalkulasi');
+            areaKalkulasi.innerHTML = '';
+            areaKalkulasi.classList.remove('hidden');
+            
+            // 1. Setup Header Kolom Kriteria
+            let headerKolom = `<th class="p-3">Alternatif</th>`;
+            kriteriaList.forEach(k => {
+                headerKolom += `<th class="p-3">${k.id}<br><span class="text-xs font-normal opacity-80">${k.type}, w=${k.bobot}</span></th>`;
+            });
+
+            // Ambil Min Max
+            const { min, max } = getMinMax();
+            hasilRankingGlobal = [];
+
+            // ================== LOGIKA SAW ==================
+            if(metode === 'SAW') {
+                let barisAwal = '';
+                alternatifList.forEach(alt => {
+                    barisAwal += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td>`;
+                    kriteriaList.forEach(k => barisAwal += `<td class="p-3">${alt.nilai[k.id]}</td>`);
+                    barisAwal += `</tr>`;
+                });
+                areaKalkulasi.innerHTML += buatTabelMatriks('1. Matriks Keputusan Awal', headerKolom, barisAwal);
+
+                let barisNorm = '';
+                alternatifList.forEach(alt => {
+                    barisNorm += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td>`;
+                    kriteriaList.forEach(k => {
+                        let val = alt.nilai[k.id];
+                        let norm = k.type === 'Benefit' ? (val / max[k.id]) : (min[k.id] / val);
+                        barisNorm += `<td class="p-3 text-emerald-600">${norm.toFixed(4)}</td>`;
+                    });
+                    barisNorm += `</tr>`;
+                });
+                areaKalkulasi.innerHTML += buatTabelMatriks('2. Matriks Normalisasi (R)', headerKolom, barisNorm);
+
+                let barisBobot = '';
+                let thBobot = headerKolom + `<th class="p-3 bg-blue-800">Skor (V)</th>`;
+                alternatifList.forEach(alt => {
+                    barisBobot += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td>`;
+                    let skorTotal = 0;
+                    kriteriaList.forEach(k => {
+                        let val = alt.nilai[k.id];
+                        let norm = k.type === 'Benefit' ? (val / max[k.id]) : (min[k.id] / val);
+                        let terbobot = norm * k.bobot;
+                        skorTotal += terbobot;
+                        barisBobot += `<td class="p-3 text-purple-600">${terbobot.toFixed(4)}</td>`;
+                    });
+                    barisBobot += `<td class="p-3 font-bold text-slate-800 bg-slate-100">${skorTotal.toFixed(4)}</td></tr>`;
+                    hasilRankingGlobal.push({ nama: alt.nama, skor: skorTotal });
+                });
+                areaKalkulasi.innerHTML += buatTabelMatriks('3. Matriks Terbobot (V) & Total', thBobot, barisBobot);
+            }
+            
+            // ================== LOGIKA WP ==================
+            else if(metode === 'WP') {
+                let barisAwal = '';
+                alternatifList.forEach(alt => {
+                    barisAwal += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td>`;
+                    kriteriaList.forEach(k => barisAwal += `<td class="p-3">${alt.nilai[k.id]}</td>`);
+                    barisAwal += `</tr>`;
+                });
+                areaKalkulasi.innerHTML += buatTabelMatriks('1. Matriks Keputusan Awal', headerKolom, barisAwal);
+
+                let barisS = '';
+                let thS = `<th class="p-3">Alternatif</th><th class="p-3">Perhitungan Pangkat</th><th class="p-3 bg-blue-800">Vektor S</th>`;
+                let totalS = 0;
+                let vektorSData = [];
+
+                alternatifList.forEach(alt => {
+                    let S = 1;
+                    let txtPerhitungan = [];
+                    kriteriaList.forEach(k => {
+                        let pangkat = k.type === 'Benefit' ? k.bobot : -k.bobot;
+                        S *= Math.pow(alt.nilai[k.id], pangkat);
+                        txtPerhitungan.push(`(${alt.nilai[k.id]}<sup>${pangkat}</sup>)`);
+                    });
+                    totalS += S;
+                    vektorSData.push({ nama: alt.nama, s: S });
+                    barisS += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td><td class="p-3 text-xs text-gray-500">${txtPerhitungan.join(' * ')}</td><td class="p-3 font-bold text-emerald-600">${S.toFixed(4)}</td></tr>`;
+                });
+                barisS += `<tr class="bg-slate-100 font-bold"><td colspan="2" class="p-3 text-right text-slate-700">TOTAL VEKTOR S :</td><td class="p-3 text-emerald-800">${totalS.toFixed(4)}</td></tr>`;
+                areaKalkulasi.innerHTML += buatTabelMatriks('2. Perhitungan Vektor S', thS, barisS);
+
+                let barisV = '';
+                let thV = `<th class="p-3">Alternatif</th><th class="p-3">Rumus (S / Total S)</th><th class="p-3 bg-blue-800">Vektor V (Hasil)</th>`;
+                vektorSData.forEach(item => {
+                    let skor = item.s / totalS;
+                    barisV += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${item.nama}</td><td class="p-3 text-slate-500">${item.s.toFixed(4)} / ${totalS.toFixed(4)}</td><td class="p-3 font-bold text-purple-600 bg-slate-100">${skor.toFixed(4)}</td></tr>`;
+                    hasilRankingGlobal.push({ nama: item.nama, skor: skor });
+                });
+                areaKalkulasi.innerHTML += buatTabelMatriks('3. Perhitungan Vektor V', thV, barisV);
+            }
+
+            // ================== LOGIKA SMART (YANG DIREVISI) ==================
+            else if(metode === 'SMART') {
+                // Matriks Awal + Tampilan Max Min
+                let barisAwal = '';
+                alternatifList.forEach(alt => {
+                    barisAwal += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td>`;
+                    kriteriaList.forEach(k => barisAwal += `<td class="p-3">${alt.nilai[k.id]}</td>`);
+                    barisAwal += `</tr>`;
+                });
+                
+                barisAwal += `<tr class="bg-blue-50 font-bold border-t border-blue-200"><td class="p-3 text-right text-blue-800">Nilai Max (C_max) :</td>`;
+                kriteriaList.forEach(k => barisAwal += `<td class="p-3 text-emerald-600">${max[k.id]}</td>`);
+                barisAwal += `</tr><tr class="bg-red-50 font-bold border-b border-red-200"><td class="p-3 text-right text-red-800">Nilai Min (C_min) :</td>`;
+                kriteriaList.forEach(k => barisAwal += `<td class="p-3 text-red-600">${min[k.id]}</td>`);
+                barisAwal += `</tr>`;
+
+                areaKalkulasi.innerHTML += buatTabelMatriks('1. Matriks Keputusan Awal & Pencarian Min/Max', headerKolom, barisAwal);
+
+                // Matriks Utility
+                let barisUtil = '';
+                alternatifList.forEach(alt => {
+                    barisUtil += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td>`;
+                    kriteriaList.forEach(k => {
+                        let val = alt.nilai[k.id];
+                        let rentang = max[k.id] - min[k.id] === 0 ? 1 : max[k.id] - min[k.id];
+                        let utility = k.type === 'Benefit' ? ((val - min[k.id]) / rentang) : ((max[k.id] - val) / rentang);
+                        
+                        // Highlight khusus jika nilainya 0 atau 1
+                        let utilClass = "text-emerald-600";
+                        if(utility === 0) utilClass = "text-red-500 font-bold";
+                        if(utility === 1) utilClass = "text-blue-600 font-bold";
+
+                        barisUtil += `<td class="p-3 ${utilClass}">${utility.toFixed(4)}</td>`;
+                    });
+                    barisUtil += `</tr>`;
+                });
+                areaKalkulasi.innerHTML += buatTabelMatriks('2. Matriks Nilai Utility (0 = Terburuk, 1 = Terbaik)', headerKolom, barisUtil);
+
+                // Matriks Terbobot & Akhir
+                let barisAkhir = '';
+                let thAkhir = headerKolom + `<th class="p-3 bg-blue-800">Skor Akhir</th>`;
+                alternatifList.forEach(alt => {
+                    barisAkhir += `<tr class="border-b hover:bg-slate-50"><td class="p-3 font-semibold">${alt.nama}</td>`;
+                    let skorTotal = 0;
+                    kriteriaList.forEach(k => {
+                        let rentang = max[k.id] - min[k.id] === 0 ? 1 : max[k.id] - min[k.id];
+                        let utility = k.type === 'Benefit' ? ((alt.nilai[k.id] - min[k.id]) / rentang) : ((max[k.id] - alt.nilai[k.id]) / rentang);
+                        let terbobot = utility * k.bobot;
+                        skorTotal += terbobot;
+                        barisAkhir += `<td class="p-3 text-purple-600">${terbobot.toFixed(4)}</td>`;
+                    });
+                    barisAkhir += `<td class="p-3 font-bold text-slate-800 bg-slate-100">${skorTotal.toFixed(4)}</td></tr>`;
+                    hasilRankingGlobal.push({ nama: alt.nama, skor: skorTotal });
+                });
+                areaKalkulasi.innerHTML += buatTabelMatriks('3. Matriks Utility Terbobot & Total', thAkhir, barisAkhir);
+            }
+
+            // Tampilkan tombol untuk pindah ke tab hasil
+            document.getElementById('tombolLanjutHasil').classList.remove('hidden');
+            renderHasilAkhir();
+        }
+
+        // --- RENDER HASIL AKHIR ---
+        function renderHasilAkhir() {
+            document.getElementById('judulHasil').innerText = `🏆 Hasil Perankingan (${metodeAktif})`;
+            hasilRankingGlobal.sort((a, b) => b.skor - a.skor);
+            
+            const tbody = document.getElementById('tabelHasilAkhir');
+            tbody.innerHTML = ''; 
+            
+            hasilRankingGlobal.forEach((item, index) => {
+                let rowClass = index === 0 ? 'bg-yellow-500/20 text-yellow-300 font-bold border-b border-slate-600' : 'border-b border-slate-700 hover:bg-slate-700/50 transition';
+                let rankTrophy = index === 0 ? '🥇 1' : (index === 1 ? '🥈 2' : (index === 2 ? '🥉 3' : index + 1));
+                tbody.innerHTML += `
+                    <tr class="${rowClass}">
+                        <td class="p-4 text-center sm:text-left">${rankTrophy}</td>
+                        <td class="p-4">${item.nama}</td>
+                        <td class="p-4 font-mono text-emerald-400 font-bold text-lg">${item.skor.toFixed(4)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- LOAD DATA DUMMY ---
+        function loadDataDummy() {
+            kriteriaList = [
+                { id: 'C1', nama: 'Harga', type: 'Cost', bobot: 0.30 },
+                { id: 'C2', nama: 'RAM', type: 'Benefit', bobot: 0.20 },
+                { id: 'C3', nama: 'Storage', type: 'Benefit', bobot: 0.20 },
+                { id: 'C4', nama: 'Kamera', type: 'Benefit', bobot: 0.15 },
+                { id: 'C5', nama: 'Baterai', type: 'Benefit', bobot: 0.15 }
+            ];
+            kriteriaCounter = 6;
+            
+            alternatifList = [
+                { nama: "iPhone 15 Pro Max", nilai: {C1: 23, C2: 8, C3: 256, C4: 10, C5: 4422} },
+                { nama: "Samsung S24 Ultra", nilai: {C1: 21, C2: 12, C3: 256, C4: 10, C5: 5000} },
+                { nama: "Poco F6 Pro", nilai: {C1: 8, C2: 12, C3: 512, C4: 8, C5: 5000} },
+                { nama: "Infinix GT 20 Pro", nilai: {C1: 4.5, C2: 12, C3: 256, C4: 7, C5: 5000} },
+                { nama: "Samsung Galaxy A55", nilai: {C1: 6, C2: 8, C3: 256, C4: 8, C5: 5000} }
+            ];
+
+            renderKriteria();
+            alert("Data Dummy HP berhasil di-load! Silakan menuju Step 3 (Kalkulasi).");
+        }
+
+        // Inisialisasi awal
+        renderKriteria();
+    </script>
+</body>
+</html>
